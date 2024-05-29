@@ -1,0 +1,47 @@
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.8.1
+    container_name: es01
+    environment:
+      - cluster.name=javacafe-cluster
+      - node.name=es01
+      - network.host=0.0.0.0
+      - http.port=9200
+      - transport.tcp.port=9300
+      - cluster.initial_master_nodes=es01
+      - path.repo=/es/book_backup/search_example
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data01:/usr/share/elasticsearch/data
+      - ./search_example:/es/book_backup/search_example
+    ports:
+      - 9200:9200
+      - 9300:9300
+    networks:
+      - elastic
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.8.1
+    container_name: kibana
+    restart: always
+    environment:
+      ELASTICSEARCH_HOSTS: http://es01:9200
+    ports:
+      - 5601:5601
+    depends_on:
+      - es01
+    networks:
+      - elastic
+
+volumes:
+  data01:
+    driver: local
+
+networks:
+  elastic:
+    driver: bridge
