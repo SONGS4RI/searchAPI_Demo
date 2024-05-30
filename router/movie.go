@@ -9,5 +9,5 @@ import (
 func (r *Router) MovieRouter(router *gin.RouterGroup) {
 	c := controller.NewController()
 
-	router.GET("", c.GetMovies)
+	router.GET("", c.SearchMovie)
 }

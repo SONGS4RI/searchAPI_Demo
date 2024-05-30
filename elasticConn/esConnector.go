@@ -25,7 +25,3 @@ func InitEs() {
 		log.Println("ELASTIC CLIENT  연결 성공!!!")
 	}
 }
-
-func GetEsClinet() (client *elastic.Client) {
-	return EsClient
-}
