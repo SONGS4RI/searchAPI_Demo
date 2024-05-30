@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func(r * Router) TestRouter(router *gin.RouterGroup) {
+func (r *Router) MovieRouter(router *gin.RouterGroup) {
 	c := controller.NewController()
 
-	router.GET("/test", c.TestController)
+	router.GET("", c.GetMovies)
 }
