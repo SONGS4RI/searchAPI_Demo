@@ -20,6 +20,9 @@ var (
 	index string = "movie_search" // 인덱스
 )
 
+/*
+MatchAllQuery를 사용하는 페이징 검색
+*/
 func EsSearchAllMovies(param map[string]string) (result []interface{}, cerr customerror.CustomError) {
 	// 검색 시작 값
 	page, _ := strconv.Atoi(param["page"])
@@ -51,21 +54,18 @@ func EsSearchAllMovies(param map[string]string) (result []interface{}, cerr cust
 		log.Println(err)
 		return
 	}
-	if res.Hits.TotalHits.Value < int64(from) {
-		cerr = *customerror.ErrNotFound
+
+	if !isPageAvailable(from, res, &cerr) {
 		return
 	}
-	for _, value := range res.Hits.Hits {
-		movie := new(model.Movie)
-		err := json.Unmarshal(value.Source, &movie)
-		if err != nil {
-			log.Println("ERROR: Movie:", err)
-		}
-		result = append(result, movie)
-	}
+
+	handleSearchResult(&result, res)
 	return
 }
 
+/*
+BoolQuery를 사용하는 페이징 검색
+*/
 func EsSearchNameMovie(param map[string]string) (result []interface{}, cerr customerror.CustomError) {
 	// 검색 시작 값
 	page, _ := strconv.Atoi(param["page"])
@@ -98,18 +98,30 @@ func EsSearchNameMovie(param map[string]string) (result []interface{}, cerr cust
 		return
 	}
 
-	if res.Hits.TotalHits.Value < int64(from) {
-		cerr = *customerror.ErrNotFound
+	if !isPageAvailable(from, res, &cerr) {
 		return
 	}
 
+	handleSearchResult(&result, res)
+	return
+}
+
+func isPageAvailable(from int, res *elasticSearch.SearchResult, cerr *customerror.CustomError) bool {
+	if res.Hits.TotalHits.Value < int64(from) {
+		*cerr = *customerror.ErrNotFound
+		return false
+	}
+	return true
+}
+
+func handleSearchResult(result *[]interface{}, res *elasticSearch.SearchResult) {
 	for _, value := range res.Hits.Hits {
 		movie := new(model.Movie)
 		err := json.Unmarshal(value.Source, &movie)
 		if err != nil {
 			log.Println("ERROR: Movie:", err)
 		}
-		result = append(result, movie)
+		*result = append(*result, movie)
 	}
-	return
+
 }
