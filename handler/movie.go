@@ -18,10 +18,14 @@ var (
 	from  int
 	size  int    = 20
 	index string = "movie_search" // 인덱스
+	defaultMovieSource = []string{
+		"companies", "companys", "directors", "genreAlt", "movieCd",
+		"movieNm", "movieNmEn", "nationAlt", "openDt", "prdtStatNm",
+		"prdtYear", "repGenreNm", "repNationNm", "typeNm"}
 )
 
 /*
-MatchAllQuery를 사용하는 페이징 검색
+	MatchAllQuery를 사용하는 페이징 검색
 */
 func EsSearchAllMovies(param map[string]string) (result []interface{}, cerr customerror.CustomError) {
 	// 검색 시작 값
@@ -31,11 +35,7 @@ func EsSearchAllMovies(param map[string]string) (result []interface{}, cerr cust
 
 	query := manager.MatchAllQuery()
 
-	movieSource := []string{
-		"companies", "companys", "directors", "genreAlt", "movieCd",
-		"movieNm", "movieNmEn", "nationAlt", "openDt", "prdtStatNm",
-		"prdtYear", "repGenreNm", "repNationNm", "typeNm"}
-	fsc := elasticSearch.NewFetchSourceContext(true).Include(movieSource...)
+	fsc := elasticSearch.NewFetchSourceContext(true).Include(defaultMovieSource...)
 
 	client := elasticConn.EsClient
 	esSearch := client.Search().
@@ -60,11 +60,12 @@ func EsSearchAllMovies(param map[string]string) (result []interface{}, cerr cust
 	}
 
 	handleSearchResult(&result, res)
+
 	return
 }
 
 /*
-BoolQuery를 사용하는 페이징 검색
+	BoolQuery를 사용하는 페이징 검색
 */
 func EsSearchNameMovie(param map[string]string) (result []interface{}, cerr customerror.CustomError) {
 	// 검색 시작 값
@@ -74,11 +75,7 @@ func EsSearchNameMovie(param map[string]string) (result []interface{}, cerr cust
 
 	query := manager.BoolQuery(param["search"])
 
-	movieSource := []string{
-		"companies", "companys", "directors", "genreAlt", "movieCd",
-		"movieNm", "movieNmEn", "nationAlt", "openDt", "prdtStatNm",
-		"prdtYear", "repGenreNm", "repNationNm", "typeNm"}
-	fsc := elasticSearch.NewFetchSourceContext(true).Include(movieSource...)
+	fsc := elasticSearch.NewFetchSourceContext(true).Include(defaultMovieSource...)
 
 	client := elasticConn.EsClient
 	esSearch := client.Search().
@@ -103,9 +100,13 @@ func EsSearchNameMovie(param map[string]string) (result []interface{}, cerr cust
 	}
 
 	handleSearchResult(&result, res)
+
 	return
 }
 
+/*
+	요청 페이지에 검색 결과가 존재하는지 체크하는 함수.
+*/
 func isPageAvailable(from int, res *elasticSearch.SearchResult, cerr *customerror.CustomError) bool {
 	if res.Hits.TotalHits.Value < int64(from) {
 		*cerr = *customerror.ErrNotFound
@@ -114,6 +115,9 @@ func isPageAvailable(from int, res *elasticSearch.SearchResult, cerr *customerro
 	return true
 }
 
+/*
+	요청한 영화 검색 결과 담아주는 함수.
+*/
 func handleSearchResult(result *[]interface{}, res *elasticSearch.SearchResult) {
 	for _, value := range res.Hits.Hits {
 		movie := new(model.Movie)
