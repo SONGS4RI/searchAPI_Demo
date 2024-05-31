@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	customerror "searchAPI/global/customError"
 	"searchAPI/handler"
 	"searchAPI/response"
 
@@ -28,7 +29,7 @@ func (c *Controller) SearchMovie(ctx *gin.Context) {
 	query[page] = ctx.DefaultQuery(page, "1") // 검색 시작 위치 지정
 	query[search] = ctx.Query(search)
 
-	var queryManager func(map[string]string) (result []interface{}, err error)
+	var queryManager func(map[string]string) (result []interface{}, cerr customerror.CustomError)
 
 	if query["search"] == "" { // 검색어 기반 검색이 아닌 경우
 		queryManager = handler.EsSearchAllMovies
@@ -36,8 +37,8 @@ func (c *Controller) SearchMovie(ctx *gin.Context) {
 		queryManager = handler.EsSearchNameMovie
 	}
 
-	if result, err := queryManager(query); err != nil {
-		response.Status = http.StatusInternalServerError
+	if result, err := queryManager(query); err.Err != nil {
+		response.Status = err.Code
 		response.Desc = err.Error()
 	} else {
 		response.Status = http.StatusOK

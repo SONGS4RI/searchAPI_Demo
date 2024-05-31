@@ -9,6 +9,7 @@ import (
 	elasticSearch "github.com/olivere/elastic/v7"
 
 	elasticConn "searchAPI/elasticConn"
+	customerror "searchAPI/global/customError"
 	"searchAPI/manager"
 	"searchAPI/model"
 )
@@ -19,7 +20,7 @@ var (
 	index string = "movie_search" // 인덱스
 )
 
-func EsSearchAllMovies(param map[string]string) (result []interface{}, err error) {
+func EsSearchAllMovies(param map[string]string) (result []interface{}, cerr customerror.CustomError) {
 	// 검색 시작 값
 	page, _ := strconv.Atoi(param["page"])
 
@@ -50,7 +51,10 @@ func EsSearchAllMovies(param map[string]string) (result []interface{}, err error
 		log.Println(err)
 		return
 	}
-
+	if res.Hits.TotalHits.Value < int64(from) {
+		cerr = *customerror.ErrNotFound
+		return
+	}
 	for _, value := range res.Hits.Hits {
 		movie := new(model.Movie)
 		err := json.Unmarshal(value.Source, &movie)
@@ -62,7 +66,7 @@ func EsSearchAllMovies(param map[string]string) (result []interface{}, err error
 	return
 }
 
-func EsSearchNameMovie(param map[string]string) (result []interface{}, err error) {
+func EsSearchNameMovie(param map[string]string) (result []interface{}, cerr customerror.CustomError) {
 	// 검색 시작 값
 	page, _ := strconv.Atoi(param["page"])
 
@@ -91,6 +95,11 @@ func EsSearchNameMovie(param map[string]string) (result []interface{}, err error
 
 	if err != nil {
 		log.Println(err)
+		return
+	}
+
+	if res.Hits.TotalHits.Value < int64(from) {
+		cerr = *customerror.ErrNotFound
 		return
 	}
 
