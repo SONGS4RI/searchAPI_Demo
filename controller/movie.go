@@ -13,6 +13,15 @@ var (
 	search = "search"
 )
 
+// @Tags movies : movies API
+// @Summary 영화명 검색 API
+// @Description 영화명 검색 API입니다.
+// @Accept  json
+// @Produce  json
+// @Router /movies [get]
+// @Param search query string false "영화 제목"
+// @Param page query int false "페이지"
+// @Success 200 {object} response.Response
 func (c *Controller) SearchMovie(ctx *gin.Context) {
 	response := response.Response{}
 	query := make(map[string]string)

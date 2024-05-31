@@ -4,12 +4,16 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	elasticConn "searchAPI/elasticConn"
-	"searchAPI/router"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"golang.org/x/sync/errgroup"
+
+	_ "searchAPI/docs"
+	elasticConn "searchAPI/elasticConn"
+	"searchAPI/router"
 )
 
 var (
@@ -26,7 +30,7 @@ func main() {
 		Addr:           ":" + portNumber,
 		Handler:        setUpRouter(),
 		ReadTimeout:    time.Duration(timeout) * time.Second,
-		WriteTimeout:   time.Duration(timeout) * time.Second,
+		WriteTimeout:   time.Duration(timeout) * time.Second, // 6:22
 		MaxHeaderBytes: 1 << 20,
 	}
 
@@ -63,8 +67,25 @@ func setUpRouter() http.Handler {
 			cache,
 		)
 	}), gin.Recovery())
-
+	setUpSwagger(e)
 	rt := router.NewRouter()
 	rt.MovieRouter(e.Group("movies")) // localhost:8080/{!HERE!}
 	return e
+}
+
+// @title Swagger SearchAPI
+// @version 1.0
+// @description SearchAPI server.
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /
+func setUpSwagger(r *gin.Engine) {
+	r.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusFound, "/swagger/index.html")
+	})
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }

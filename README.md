@@ -2,6 +2,8 @@
 
 gin gonic과 elasticsearch를 활용하여 검색API를 구현해 보는 프로젝트입니다.
 
+go 1.20 버전을 사용하였습니다.
+
 ```json
 // kibana를 사용해서 elasticsearch에서 스냅샷 복구
 // 스냅샷 등록

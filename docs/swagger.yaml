@@ -1,0 +1,49 @@
+basePath: /
+definitions:
+  response.Response:
+    properties:
+      desc:
+        example: desc
+        type: string
+      result:
+        items: {}
+        type: array
+      status:
+        example: 200
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: SearchAPI server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Swagger SearchAPI
+  version: "1.0"
+paths:
+  /movies:
+    get:
+      consumes:
+      - application/json
+      description: 영화명 검색 API입니다.
+      parameters:
+      - description: 영화 제목
+        in: query
+        name: search
+        type: string
+      - description: 페이지
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 영화명 검색 API
+      tags:
+      - 'movies : movies API'
+swagger: "2.0"
