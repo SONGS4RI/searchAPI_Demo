@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 	customerror "searchAPI/global/customError"
 	"searchAPI/handler"
@@ -10,10 +11,12 @@ import (
 )
 
 type MovieController struct {
+	Handler handler.MovieHandler
 }
 
 func NewMovieController() *MovieController {
-	return &MovieController{}
+	c := MovieController{Handler: &handler.MovieHandlerImpl{}}
+	return &c
 }
 
 var (
@@ -36,15 +39,16 @@ func (c *MovieController) SearchMovie(ctx *gin.Context) {
 	query[page] = ctx.DefaultQuery(page, "1") // 검색 시작 위치 지정
 	query[search] = ctx.Query(search)
 
-	var queryManager func(map[string]string) (result []interface{}, cerr customerror.CustomError)
+	var queryManager func(handler.MovieHandler, map[string]string) (result []interface{}, cerr customerror.CustomError)
 
 	if query["search"] == "" { // 검색어 기반 검색이 아닌 경우
-		queryManager = handler.EsSearchAllMovies
+		queryManager = handler.MovieHandler.EsSearchAllMovies
 	} else { // 검색어가 있는 경우
-		queryManager = handler.EsSearchNameMovie
+		queryManager = handler.MovieHandler.EsSearchNameMovie
 	}
 
-	if result, err := queryManager(query); err.Cerror != nil {
+	if result, err := queryManager(c.Handler, query); err.Cerror != nil {
+		log.Println(err)
 		response.Status = err.Code
 		response.Desc = err.Error()
 	} else {

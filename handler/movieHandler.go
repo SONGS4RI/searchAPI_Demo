@@ -14,20 +14,27 @@ import (
 	"searchAPI/model"
 )
 
+type MovieHandler interface {
+	EsSearchAllMovies(param map[string]string) ([]interface{}, customerror.CustomError)
+	EsSearchNameMovie(param map[string]string) ([]interface{}, customerror.CustomError)
+}
+
+type MovieHandlerImpl struct{}
+
 var (
-	from  int
-	size  int    = 20
-	index string = "movie_search" // 인덱스
-	defaultMovieSource = []string{
+	from               int
+	size               int    = 20
+	index              string = "movie_search" // 인덱스
+	defaultMovieSource        = []string{
 		"companies", "companys", "directors", "genreAlt", "movieCd",
 		"movieNm", "movieNmEn", "nationAlt", "openDt", "prdtStatNm",
 		"prdtYear", "repGenreNm", "repNationNm", "typeNm"}
 )
 
 /*
-	MatchAllQuery를 사용하는 페이징 검색
+MatchAllQuery를 사용하는 페이징 검색
 */
-func EsSearchAllMovies(param map[string]string) (result []interface{}, cerr customerror.CustomError) {
+func (h *MovieHandlerImpl) EsSearchAllMovies(param map[string]string) (result []interface{}, cerr customerror.CustomError) {
 	// 검색 시작 값
 	page, _ := strconv.Atoi(param["page"])
 
@@ -65,9 +72,9 @@ func EsSearchAllMovies(param map[string]string) (result []interface{}, cerr cust
 }
 
 /*
-	BoolQuery를 사용하는 페이징 검색
+BoolQuery를 사용하는 페이징 검색
 */
-func EsSearchNameMovie(param map[string]string) (result []interface{}, cerr customerror.CustomError) {
+func (h *MovieHandlerImpl) EsSearchNameMovie(param map[string]string) (result []interface{}, cerr customerror.CustomError) {
 	// 검색 시작 값
 	page, _ := strconv.Atoi(param["page"])
 
@@ -104,8 +111,12 @@ func EsSearchNameMovie(param map[string]string) (result []interface{}, cerr cust
 	return
 }
 
+func EsSearchNameMovieFunc(handler MovieHandler, param map[string]string) ([]interface{}, customerror.CustomError) {
+	return handler.EsSearchAllMovies(param)
+}
+
 /*
-	요청 페이지에 검색 결과가 존재하는지 체크하는 함수.
+요청 페이지에 검색 결과가 존재하는지 체크하는 함수.
 */
 func isPageAvailable(from int, res *elasticSearch.SearchResult, cerr *customerror.CustomError) bool {
 	if res.Hits.TotalHits.Value < int64(from) {
@@ -116,7 +127,7 @@ func isPageAvailable(from int, res *elasticSearch.SearchResult, cerr *customerro
 }
 
 /*
-	요청한 영화 검색 결과 담아주는 함수.
+요청한 영화 검색 결과 담아주는 함수.
 */
 func handleSearchResult(result *[]interface{}, res *elasticSearch.SearchResult) {
 	for _, value := range res.Hits.Hits {
