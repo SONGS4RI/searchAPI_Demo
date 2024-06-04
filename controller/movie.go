@@ -37,7 +37,7 @@ func (c *Controller) SearchMovie(ctx *gin.Context) {
 		queryManager = handler.EsSearchNameMovie
 	}
 
-	if result, err := queryManager(query); err.Err != nil {
+	if result, err := queryManager(query); err.Cerror != nil {
 		response.Status = err.Code
 		response.Desc = err.Error()
 	} else {

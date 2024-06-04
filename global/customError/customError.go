@@ -4,14 +4,14 @@ import "errors"
 
 type CustomError struct {
 	Code int
-	Err  error
+	Cerror  error
 }
 
 func (e *CustomError) Error() string {
-    return e.Err.Error()
+    return e.Cerror.Error()
 }
 
 var ErrNotFound = &CustomError{
     Code:  404,
-    Err: errors.New("NOT FOUND"),
+    Cerror: errors.New("NOT FOUND"),
 }
