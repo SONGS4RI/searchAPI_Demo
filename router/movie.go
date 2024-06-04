@@ -7,7 +7,7 @@ import (
 )
 
 func (r *Router) MovieRouter(router *gin.RouterGroup) {
-	c := controller.NewController()
+	c := controller.NewMovieController()
 
 	router.GET("", c.SearchMovie)
 }

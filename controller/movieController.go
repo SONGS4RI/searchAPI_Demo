@@ -9,6 +9,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type MovieController struct {
+}
+
+func NewMovieController() *MovieController {
+	return &MovieController{}
+}
+
 var (
 	page   = "page"
 	search = "search"
@@ -23,7 +30,7 @@ var (
 // @Param search query string false "영화 제목"
 // @Param page query int false "페이지"
 // @Success 200 {object} response.Response
-func (c *Controller) SearchMovie(ctx *gin.Context) {
+func (c *MovieController) SearchMovie(ctx *gin.Context) {
 	response := response.Response{}
 	query := make(map[string]string)
 	query[page] = ctx.DefaultQuery(page, "1") // 검색 시작 위치 지정
