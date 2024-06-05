@@ -11,6 +11,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"golang.org/x/sync/errgroup"
 
+	"searchAPI/config"
 	_ "searchAPI/docs"
 	elasticConn "searchAPI/elasticConn"
 	"searchAPI/router"
@@ -21,6 +22,7 @@ var (
 )
 
 func main() {
+	config.LoadElasticSeed()
 	elasticConn.InitEs()
 
 	portNumber := "8080"
